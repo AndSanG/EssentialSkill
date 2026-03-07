@@ -1,0 +1,9 @@
+Read the git story of this project and create a script of steps that should be taken to create a project from scratch, connect to an api, then create local cache and then the foundation for UI. 
+Organize in a way that can be prompted for any project with similar requirements 
+The project's evolution follows a highly disciplined, Test-Driven Development (TDD) and Modular approach. By analyzing the git history, we can see a clear pattern of decoupling infrastructure (Networking/DB) from domain logic and UI.
+
+The Git Story Summary
+Foundation (Remote API): The project began with the RemoteFeedLoader. Instead of building a UI first, the focus was on establishing a reliable networking contract (HTTPClient protocol) and mapping external JSON data to internal Domain Models. This ensured the core business logic was never coupled to the API's format.
+Persistence (Local Cache): Once the remote data flow was stable, caching was introduced. A FeedStore protocol was defined, allowing the team to swap between Codable and CoreData implementations without touching the LocalFeedLoader logic.
+Discovery (UI Prototyping): Before building the production UI, a "Prototype" target was created. This allowed for rapid iteration on visual details (shimmering effects, cell layouts) using hardcoded data, avoiding the "slow" cycle of real data integration.
+Decoupled UI: The final UI was built in a separate module (EssentialFeediOS). It uses the Composition Root pattern, where ViewControllers are generic and don't know where their data comes from (API or Cache). They are "composed" together in the main application layer.
