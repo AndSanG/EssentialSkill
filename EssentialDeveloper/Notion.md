@@ -82,6 +82,3 @@ After the AI and you have successfully delivered the Artifacts and met the Exit 
 Move to Phase 2: "Phase 1 Exit Criteria met. Let's start Phase 2: Networking Module."
 Move to Phase 3: "Phase 2 Exit Criteria met. Let's start Phase 3: Persistence Module."
 Move to Phase 4: "Phase 3 Exit Criteria met. Let's start Phase 4: UI Foundation."
-
-Comment
-⌥⌘M

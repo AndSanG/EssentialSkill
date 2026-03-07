@@ -1,8 +1,9 @@
 # EssentialFeed Project Memory
 
 ## Project Overview
-iOS app following strict TDD + Clean Architecture + Modular design.
-Language: Swift | Framework: UIKit | Persistence: CoreData | Network: URLSession
+This is a memory from an iOS app following strict TDD + Clean Architecture + Modular design.
+Language: Swift | Framework: UIKit | Persistence: CoreData | Network: URLSession. 
+The specific stack is not important, the focus is on the architecture and the TDD process.
 
 ## Key Architectural Patterns
 - Dependency injection via protocols (HTTPClient, FeedLoader, FeedStore, FeedImageDataLoader)
