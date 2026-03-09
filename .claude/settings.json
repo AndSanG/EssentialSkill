@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add tdd-project-script.md EssentialDeveloper/MEMORY.md EssentialDeveloper/Notion.md EssentialDeveloper/tdd-project-script.md)"
+    ],
+    "additionalDirectories": [
+      "/Users/asanchez/Developer/EssentialSkill/.claude/skills",
+      "/Users/asanchez/Developer/EssentialSkill/.claude/skills/tdd"
+    ]
+  }
+}
