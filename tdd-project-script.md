@@ -6,6 +6,17 @@ Replace `[Feature]` with your domain noun (e.g., Feed, Product, Post).
 
 ---
 
+## Session Start
+
+> Use this section at the beginning of every new session — including mid-phase handoffs.
+
+1. Read `CLAUDE.md` — hard constraints for this project.
+2. Run `git log --oneline` — identify the last committed test.
+3. Find that test's step in this script and confirm the current phase.
+4. State which step comes next. Do not write any code until confirmed.
+
+---
+
 ## Introduction for Agents
 
 This document is a phase-by-phase execution guide. Read it fully before taking any action. Work through one phase at a time and do not advance until the exit criteria for the current phase is met.
@@ -639,7 +650,11 @@ func onSearchTextChanged(_ text: String) {
 - [ ] No test exists in the codebase without a corresponding passing implementation in the same or earlier commit.
 - [ ] The git log reads as a narrative of behavior, not a dump of files.
 
-If you are resuming work in a new session, run `git log --oneline` first. Compare the log against the phase checklist. Do not write new tests until you have confirmed all previous ones are committed.
+If you are resuming work in a new session:
+1. Read `CLAUDE.md` — it defines the hard constraints for this project.
+2. Run `git log --oneline` — compare the log against the phase checklist in this file.
+3. Identify the last committed test and locate the matching step in this script.
+4. Do not write new tests until you have confirmed all previous ones are committed.
 
 ---
 
