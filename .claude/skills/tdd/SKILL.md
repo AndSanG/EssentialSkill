@@ -23,6 +23,7 @@ If no argument is given, start from the Session Start protocol above.
 
 - No production code without a failing test first (Red phase is mandatory).
 - No commit without a passing test.
+- Every commit must compile and run — tests may fail (Red), but the build must never be broken. Add stubs before committing a failing test.
 - No advancing to the next phase until every test in the current phase has its own commit.
 - Tests must be in a separate test target — not embedded in the production module.
 - The Domain framework targets macOS only — no iOS simulator required for domain tests.

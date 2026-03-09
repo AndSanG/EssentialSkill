@@ -128,6 +128,9 @@ Use cases are defined in BDD style, domain models are identified and separated f
 
 **Exit Criteria:** The system can be fully described in terms of modules and contracts without naming any specific framework (no URLSession, CoreData, SwiftUI, etc.).
 
+**Commit:** `"Add use cases, module map, and protocol contracts"`
+**Push:** `git push origin master`
+
 ---
 
 ## PHASE 1 — Project Foundation
@@ -142,7 +145,7 @@ An Xcode iOS app is created alongside a **macOS framework** target for domain lo
    > **Decision:** The domain framework targets **macOS only** (not cross-platform iOS+macOS). This is intentional: macOS-only means the test suite runs natively on the Mac without launching a simulator, giving the fastest possible CI feedback loop. The iOS app target links this same framework at build time — no duplication.
 3. Add a **macOS Unit Testing Bundle** target: `[AppName]Tests`, with **Target to be Tested** set to the macOS framework. Tests run on Mac, no simulator needed.
 4. Set test execution to **random order** and enable **code coverage**.
-5. Add `.gitignore`, commit: `"Initial commit"`.
+5. Add `.gitignore`.
 
 > **Why macOS for the domain framework?**
 > The domain and networking layers have no platform-specific dependencies. Targeting macOS lets the test suite run in seconds on the local machine without launching a simulator. The iOS app target links the same framework at build time, so there is no duplication.
@@ -150,6 +153,9 @@ An Xcode iOS app is created alongside a **macOS framework** target for domain lo
 **Artifacts:** Xcode project with iOS app target + macOS framework target + macOS test target, CI-ready scheme.
 
 **Exit Criteria:** Project builds cleanly. Domain test suite runs on Mac (no simulator) with zero tests, random order, and coverage enabled.
+
+**Commit:** `"Initial commit"`
+**Push:** `git push origin master`
 
 ---
 
@@ -179,15 +185,15 @@ Remote[Feature]Loader is implemented using strict TDD with an injected HTTPClien
 Tests are written one at a time — each must fail first, then pass.
 
 Write tests in this order (one failing test → make it pass → next):
-1. `init_doesNotRequestData` — loader does not call the client on init.
-2. `load_requestsDataFromURL` — calling `load()` triggers one request to the correct URL.
-3. `loadTwice_requestsDataFromURLTwice` — can call `load()` more than once.
-4. `load_deliversConnectivityErrorOnClientError` — client error → `.connectivity` error.
-5. `load_deliversInvalidDataErrorOnNon200Response` — non-200 → `.invalidData` error.
-6. `load_deliversInvalidDataErrorOn200ResponseWithInvalidJSON` — 200 + bad JSON → `.invalidData`.
-7. `load_deliversNoItemsOn200ResponseWithEmptyJSONList` — 200 + `{"items":[]}` → empty array.
-8. `load_deliversItemsOn200ResponseWithJSONItems` — 200 + valid JSON → domain models.
-9. `load_doesNotDeliverResultAfterSUTHasBeenDeallocated` — memory/lifetime safety.
+- `init_doesNotRequestData` — loader does not call the client on init.
+- `load_requestsDataFromURL` — calling `load()` triggers one request to the correct URL.
+- `loadTwice_requestsDataFromURLTwice` — can call `load()` more than once.
+- `load_deliversConnectivityErrorOnClientError` — client error → `.connectivity` error.
+- `load_deliversInvalidDataErrorOnNon200Response` — non-200 → `.invalidData` error.
+- `load_deliversInvalidDataErrorOn200ResponseWithInvalidJSON` — 200 + bad JSON → `.invalidData`.
+- `load_deliversNoItemsOn200ResponseWithEmptyJSONList` — 200 + `{"items":[]}` → empty array.
+- `load_deliversItemsOn200ResponseWithJSONItems` — 200 + valid JSON → domain models.
+- `load_doesNotDeliverResultAfterSUTHasBeenDeallocated` — memory/lifetime safety.
 
 **Key decisions at this stage:**
 - Inject `HTTPClient` as a protocol (not URLSession directly).
@@ -228,10 +234,13 @@ URLSessionHTTPClient is implemented conforming to HTTPClient. URLProtocol stubs 
 - Run all test targets.
 - Add CI badge to README.
 - **Commit:** `"Add CI scheme + GitHub Actions config"`
+- **Push to remote** (`git push origin master`) and confirm the CI run passes on GitHub before continuing.
+
+> Do not advance to Phase 3 until the remote CI run is green. A passing CI run is the exit gate, not just a local test pass.
 
 **Artifacts:** `HTTPClient` protocol, `Remote[Feature]Loader`, `[Feature]ItemsMapper`, `URLSessionHTTPClient`, end-to-end test target, CI workflow.
 
-**Exit Criteria:** Remote use case can load domain models deterministically from a captured HTTP response. All mapping and error paths are covered by tests. CI is green.
+**Exit Criteria:** Remote use case can load domain models deterministically from a captured HTTP response. All mapping and error paths are covered by tests. CI is green on remote.
 
 ---
 
@@ -253,41 +262,64 @@ A [Feature]Store protocol is defined with retrieve, insert, and deleteCached ope
 
 ### 3.2 Drive Local[Feature]Loader — Save Use Case
 Tests in order:
-1. `init_doesNotMessageStoreUponCreation`
-2. `save_requestsCacheDeletion`
-3. `save_doesNotRequestInsertionOnDeletionError`
-4. `save_requestsNewCacheInsertionOnSuccessfulDeletion`
-5. `save_requestsCacheInsertionWithTimestampOnSuccessfulDeletion`
-6. `save_failsOnDeletionError`
-7. `save_failsOnInsertionError`
-8. `save_succeedsOnSuccessfulCacheInsertion`
-9. `save_doesNotDeliverResultAfterSUTDeallocated`
+- `init_doesNotMessageStoreUponCreation`
+- `save_requestsCacheDeletion`
+- `save_doesNotRequestInsertionOnDeletionError`
+- `save_requestsNewCacheInsertionOnSuccessfulDeletion`
+- `save_requestsCacheInsertionWithTimestampOnSuccessfulDeletion`
+- `save_failsOnDeletionError`
+- `save_failsOnInsertionError`
+- `save_succeedsOnSuccessfulCacheInsertion`
+- `save_doesNotDeliverResultAfterSUTDeallocated`
 
 **Key decisions:**
 - Save = Delete old → Insert new (with a timestamp).
 - Store receives `Local[Feature]Item` DTOs, not domain models.
 - Add `Local[Feature]Item` as a separate data-transfer type.
 
-**Commits:** One per test.
+**Commits (one per passing test):**
+```
+"LocalLoader does not message store upon creation"
+"Save requests cache deletion"
+"Save does not request insertion on deletion error"
+"Save requests new cache insertion on successful deletion"
+"Save requests cache insertion with timestamp on successful deletion"
+"Save fails on deletion error"
+"Save fails on insertion error"
+"Save succeeds on successful cache insertion"
+"Save does not deliver result after SUT deallocated"
+```
 
 ### 3.3 Drive Local[Feature]Loader — Load Use Case
 
 The LocalFeedLoader load use case is driven with TDD. The loader reads from a [Feature]Store and applies a max-age policy (e.g., 7 days). Deletion is not performed on load — that is handled by the separate validate use case. Domain models are delivered on success.
 
 Tests in order:
-1. `load_doesNotMessageStoreUponCreation`
-2. `load_requestsCacheRetrieval`
-3. `load_failsOnRetrievalError`
-4. `load_deliversNoItemsOnEmptyCache`
-5. `load_deliversCachedItemsOnLessThanMaxAgeOldCache`
-6. `load_deliversNoItemsOnMaxAgeOldCache`
-7. `load_deliversNoItemsOnMoreThanMaxAgeOldCache`
-8. `load_doesNotDeliverResultAfterSUTDeallocated`
+- `load_doesNotMessageStoreUponCreation`
+- `load_requestsCacheRetrieval`
+- `load_failsOnRetrievalError`
+- `load_deliversNoItemsOnEmptyCache`
+- `load_deliversCachedItemsOnLessThanMaxAgeOldCache`
+- `load_deliversNoItemsOnMaxAgeOldCache`
+- `load_deliversNoItemsOnMoreThanMaxAgeOldCache`
+- `load_doesNotDeliverResultAfterSUTDeallocated`
+
+**Commits (one per passing test):**
+```
+"Load does not message store upon creation"
+"Load requests cache retrieval"
+"Load fails on retrieval error"
+"Load delivers no items on empty cache"
+"Load delivers cached items on less than max-age old cache"
+"Load delivers no items on max-age old cache"
+"Load delivers no items on more than max-age old cache"
+"Load does not deliver result after SUT deallocated"
+```
 
 ### 3.4 Drive Local[Feature]Loader — ValidateCache Use Case
 - Separate from load: validate deletes stale/corrupt caches without delivering results.
 - Tests mirror the load cache-age policy but assert on deletion side-effects.
-- **Commit:** `"Extract Validate[Feature]Cache use case"`
+- **Commits:** One per test, then: `"Extract Validate[Feature]Cache use case"`
 
 ### 3.5 Extract Cache Policy
 
@@ -320,10 +352,13 @@ CoreData[Feature]Store is implemented conforming to [Feature]Store. Shared store
 - Test `Local[Feature]Loader` + `CoreData[Feature]Store` together end-to-end.
 - Use a real temporary file URL, clean up in setUp/tearDown.
 - Add to CI scheme.
+- **Commit:** `"Add cache integration tests"`
 
 **Artifacts:** `[Feature]Store` protocol, `CoreData[Feature]Store`, `[Feature]CachePolicy`, `Local[Feature]Loader` (save/load/validate), cache integration test target.
 
 **Exit Criteria:** Cached data loads correctly and invalidation rules are provably enforced by tests. Both Codable and CoreData stores pass the shared `[Feature]StoreSpecs` contract.
+
+**Push:** `git push origin master` — confirm CI is green before continuing.
 
 ---
 
@@ -337,6 +372,7 @@ A [AppName]Prototype app target is created with a UITableViewController and a [F
 - New app target: `[AppName]Prototype`.
 - Storyboard with a table view and a custom cell layout.
 - Hardcoded data array — no networking, no cache.
+- **Commit:** `"Add [AppName]Prototype target"`
 
 ### 4.2 Iterate Visually
 - Add shimmering/skeleton animation to cells.
@@ -348,6 +384,8 @@ A [AppName]Prototype app target is created with a UITableViewController and a [F
 **Artifacts:** Prototype app target with hardcoded UI, shimmer animation, refresh control.
 
 **Exit Criteria:** UI can be previewed and iterated with hardcoded/stubbed data with no real loaders involved.
+
+**Push:** `git push origin master` — confirm CI is green before continuing.
 
 ---
 
@@ -365,7 +403,7 @@ Before starting this phase, confirm the two decisions made in Stack Decisions:
 
 - Create `[AppName]iOS` framework target (iOS only — SwiftUI/UIKit allowed here).
 - The domain framework (macOS) remains UI-free; this iOS framework depends on it via protocols only.
-- Update CI schemes: one macOS scheme for domain + infra tests (no simulator), one iOS scheme for UI tests (simulator required).
+- Update CI workflows: `CI-macOS.yml` covers domain + infra tests (no simulator); `CI-iOS.yml` covers the iOS app target (simulator required). Add the new iOS framework to the iOS scheme if applicable.
 - **Commit:** `"Add [AppName]iOS framework target"`
 
 ### 5.2 Drive [Feature]ViewController with Tests
@@ -377,20 +415,20 @@ Before starting this phase, confirm the two decisions made in Stack Decisions:
 #### Path A — UIKit (`UITableViewController`)
 
 Tests in order:
-1. `loadActions_requestFeedFromLoader` — load triggered on `viewIsAppearing` and pull-to-refresh.
-2. `loadingIndicator_isVisibleWhileLoadingFeed` — refresh control visible during load.
-3. `loadingIndicator_isHiddenAfterLoadingCompletes` — hidden on both success and error.
-4. `load_rendersSuccessfullyLoadedFeed` — renders correct number of cells after success.
-5. `load_doesNotAlterCurrentRenderingStateOnLoadError` — error doesn't clear existing feed.
-6. `feedImageView_loadsImageURLWhenVisible` — image load starts on cell display.
-7. `feedImageView_cancelsImageLoadWhenNotVisibleAnymore` — cancel on cell reuse.
-8. `feedImageViewLoadingIndicator_isVisibleWhileLoadingImage` — shimmer while loading.
-9. `feedImageView_rendersImageLoadedFromURL` — image rendered on success.
-10. `feedImageView_showsRetryOnImageLoadError` — retry button on error.
-11. `feedImageView_showsRetryOnInvalidImageData` — retry on corrupt data.
-12. `feedImageView_retriesImageLoadOnRetryAction` — retry triggers a new load.
-13. `feedImageView_preloadsImageURLWhenNearVisible` — prefetch on `willDisplay`.
-14. `feedImageView_cancelsImageURLPreloadingWhenNotNearVisibleAnymore` — cancel on `didEndDisplaying`.
+- `loadActions_requestFeedFromLoader` — load triggered on `viewIsAppearing` and pull-to-refresh.
+- `loadingIndicator_isVisibleWhileLoadingFeed` — refresh control visible during load.
+- `loadingIndicator_isHiddenAfterLoadingCompletes` — hidden on both success and error.
+- `load_rendersSuccessfullyLoadedFeed` — renders correct number of cells after success.
+- `load_doesNotAlterCurrentRenderingStateOnLoadError` — error doesn't clear existing feed.
+- `feedImageView_loadsImageURLWhenVisible` — image load starts on cell display.
+- `feedImageView_cancelsImageLoadWhenNotVisibleAnymore` — cancel on cell reuse.
+- `feedImageViewLoadingIndicator_isVisibleWhileLoadingImage` — shimmer while loading.
+- `feedImageView_rendersImageLoadedFromURL` — image rendered on success.
+- `feedImageView_showsRetryOnImageLoadError` — retry button on error.
+- `feedImageView_showsRetryOnInvalidImageData` — retry on corrupt data.
+- `feedImageView_retriesImageLoadOnRetryAction` — retry triggers a new load.
+- `feedImageView_preloadsImageURLWhenNearVisible` — prefetch on `willDisplay`.
+- `feedImageView_cancelsImageURLPreloadingWhenNotNearVisibleAnymore` — cancel on `didEndDisplaying`.
 
 **Key decisions (UIKit):**
 - `[Feature]ViewController` conforms to `UITableViewDataSource` / `UITableViewDelegate`.
@@ -398,6 +436,8 @@ Tests in order:
 - Use `FakeUIRefreshControl` in tests (records `isRefreshing` state without UIKit behavior).
 - Decouple tests from specific UI controls with DSL helper methods.
 - Extract `FeedImageDataLoaderTask` for cancellation (Interface Segregation).
+
+**Commits:** One per passing test.
 
 ---
 
@@ -417,24 +457,26 @@ SwiftUI views are thin wrappers over observable state — the ViewModel tests *a
 
 **Tests to drive the ViewModel (one failing test → make it pass):**
 
-1. `init_doesNotLoadCharacters` — no side-effects on creation.
-2. `load_requestsCharactersFromLoader` — `load()` triggers exactly one loader call.
-3. `load_setsIsLoadingDuringRequest` — `isLoading` is `true` while in-flight.
-4. `load_clearsIsLoadingOnSuccess` — `isLoading` is `false` after success.
-5. `load_clearsIsLoadingOnFailure` — `isLoading` is `false` after failure.
-6. `load_deliversItemsOnSuccess` — `items` reflects the loaded results.
-7. `load_setsErrorMessageOnFailure` — `errorMessage` is non-nil on failure.
-8. `load_clearsErrorBeforeReloading` — stale error cleared when `load()` is called again.
-9. `load_doesNotDeliverResultAfterSUTDeallocated` — memory safety.
-10. *(If paginated)* `loadNextPage_appendsItemsOnSuccess` — page 2 appended to page 1 results.
-11. *(If paginated)* `loadNextPage_doesNothingWhenOnLastPage` — no call when `hasNextPage` is false.
-12. *(If search)* Debounce: cancel previous `Task` before starting a new one on input change. See Cross-Cutting Concerns — Search Debounce.
+- `init_doesNotLoadCharacters` — no side-effects on creation.
+- `load_requestsCharactersFromLoader` — `load()` triggers exactly one loader call.
+- `load_setsIsLoadingDuringRequest` — `isLoading` is `true` while in-flight.
+- `load_clearsIsLoadingOnSuccess` — `isLoading` is `false` after success.
+- `load_clearsIsLoadingOnFailure` — `isLoading` is `false` after failure.
+- `load_deliversItemsOnSuccess` — `items` reflects the loaded results.
+- `load_setsErrorMessageOnFailure` — `errorMessage` is non-nil on failure.
+- `load_clearsErrorBeforeReloading` — stale error cleared when `load()` is called again.
+- `load_doesNotDeliverResultAfterSUTDeallocated` — memory safety.
+- *(If paginated)* `loadNextPage_appendsItemsOnSuccess` — page 2 appended to page 1 results.
+- *(If paginated)* `loadNextPage_doesNothingWhenOnLastPage` — no call when `hasNextPage` is false.
+- *(If search)* Debounce: cancel previous `Task` before starting a new one on input change. See Cross-Cutting Concerns — Search Debounce.
 
 **Key decisions (SwiftUI):**
 - ViewModel uses `@Observable` (`import Observation`, not SwiftUI) — stays in the domain framework.
 - Views import `SwiftUI` and the domain framework; they have zero knowledge of loaders or infrastructure.
 - Image caching: use a `CachedAsyncImage` wrapper backed by `NSCache` in the UI layer — not in the domain.
 - No `FeedImageDataLoader` protocol needed unless image loading has business rules (retry, cancel, prefetch).
+
+**Commits:** One per passing test.
 
 **Image caching note:**
 > Image data loading is a UI-layer concern. Memory-level caching (`NSCache<NSURL, UIImage>`) lives in the UI target, not the domain framework. If image loading has business rules (cancellation, retry, prefetch on `willDisplay`), extract a separate `[Feature]ImageDataLoader` protocol and inject it the same way as the main loader.
@@ -447,6 +489,8 @@ SwiftUI views are thin wrappers over observable state — the ViewModel tests *a
 **Artifacts:** `[AppName]iOS` framework, `[Feature]ViewController`, `[Feature]ImageDataLoader` protocol, UI-level test suite.
 
 **Exit Criteria:** UI can be previewed/prototyped with stubbed loaders and swapped to real implementations by composition only. No UI type imports any infrastructure module.
+
+**Push:** `git push origin master` — confirm CI is green before continuing.
 
 ---
 
@@ -492,6 +536,8 @@ let viewModel = [Feature]ViewModel(loader: loader)
 **Artifacts:** Composition Root in app target, `FeedLoaderWithFallbackComposite`, `RemoteFeedLoaderCacheDecorator`, wired app/scene delegate.
 
 **Exit Criteria:** The app runs end-to-end with no UI or domain type importing infrastructure types. Full feature slice is exercisable from the main target.
+
+**Push:** `git push origin master` — confirm CI is green.
 
 ---
 
@@ -637,9 +683,15 @@ func onSearchTextChanged(_ text: String) {
 
 > This is a hard rule. Context resets between sessions. Without commits, work is invisible and unverifiable.
 
+**Every commit must build and run.** Checking out any commit in the history must produce a project that compiles and runs — tests may be failing (Red phase), but the build must never be broken. This means:
+
+- Before committing a new failing test, add the minimum stub (empty method, `fatalError`, placeholder type) needed to make the code compile.
+- Never commit a file that references a type or method that does not yet exist.
+- Run the test suite before every commit — confirm the build succeeds and the new test fails for the right reason.
+
 **Every passing test must be committed before writing the next test.** The red → green → refactor → commit cycle is non-negotiable:
 
-1. Write one failing test. Run it — confirm it fails.
+1. Write one failing test. Add any required stubs so it **compiles**. Run it — confirm it fails.
 2. Write the **minimum** production code to make it pass. Run it — confirm it passes.
 3. **Refactor** — clean up the implementation without changing behavior. Run tests again — confirm they still pass. This is where duplication is removed, names are clarified, and structure is improved. Do not skip this step; passing code is not finished code.
 4. **Commit.** Use the commit messages prescribed in each phase.

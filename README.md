@@ -153,6 +153,5 @@ Every passing test gets its own commit before the next test is written.
 | File | Purpose |
 |---|---|
 | `CLAUDE.md` | Hard constraints Claude Code enforces on every session |
-| `tdd-project-script.md` | Source of truth for the runbook (human-readable) |
 | `.claude/skills/tdd/SKILL.md` | Skill entry point — frontmatter + session protocol |
-| `.claude/skills/tdd/runbook.md` | Full phase-by-phase execution guide (used by the skill) |
+| `.claude/skills/tdd/runbook.md` | Full phase-by-phase execution guide (source of truth) |
