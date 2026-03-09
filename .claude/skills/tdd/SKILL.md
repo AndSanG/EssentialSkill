@@ -2,7 +2,7 @@
 name: tdd
 description: Run the TDD iOS project build script. Use when starting a new session, resuming a phase, or advancing to the next TDD phase. Guides through Phase 0 (Plan) → Phase 1 (Foundation) → Phase 2 (API) → Phase 3 (Cache) → Phase 4 (Prototype) → Phase 5 (UI) → Phase 6 (Composition Root).
 disable-model-invocation: true
-allowed-tools: Read, Bash, Glob, Grep
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 Follow the TDD runbook in [runbook.md](runbook.md) exactly. Read it fully before taking any action.
