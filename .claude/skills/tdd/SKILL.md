@@ -29,3 +29,5 @@ If no argument is given, start from the Session Start protocol above.
 - The Domain framework targets macOS only — no iOS simulator required for domain tests.
 - Use Swift Testing unless the deployment target requires XCTest (see runbook prerequisites table).
 - Use async/await for all new protocol methods unless the deployment target is iOS 14 or below.
+- Default branch is always **master**.
+- Stack decisions already recorded in the runbook must not be re-opened — follow what is written.
