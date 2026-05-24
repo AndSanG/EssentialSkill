@@ -6,14 +6,53 @@ Replace `[Feature]` with your domain noun (e.g., Feed, Product, Post).
 
 ---
 
+## Table of Contents
+
+- [Session Start](#session-start)
+- [Introduction for Agents](#introduction-for-agents)
+- [Project Requirements](#project-requirements)
+- [Phase 0 — Plan](#phase-0--plan)
+- [Phase 1 — Project Foundation](#phase-1--project-foundation)
+- [Phase 2 — Remote Data / API Layer](#phase-2--remote-data--api-layer)
+  - [2.1 Define the Use Case Contract](#21-define-the-use-case-contract)
+  - [2.2 Drive the RemoteLoader with Tests](#22-drive-the-remoteloader-with-tests)
+  - [2.3 Implement URLSessionHTTPClient](#23-implement-urlsessionhttpclient)
+  - [2.4 End-to-End API Tests](#24-end-to-end-api-tests)
+  - [2.5 CI Setup](#25-ci-setup)
+- [Phase 3 — Local Cache Layer](#phase-3--local-cache-layer)
+  - [3.1 Define the FeedStore / Cache Contract](#31-define-the-feedstore--cache-contract)
+  - [3.2 Drive LocalLoader — Save Use Case](#32-drive-localfeatureloader--save-use-case)
+  - [3.3 Drive LocalLoader — Load Use Case](#33-drive-localfeatureloader--load-use-case)
+  - [3.4 Drive LocalLoader — ValidateCache Use Case](#34-drive-localfeatureloader--validatecache-use-case)
+  - [3.5 Extract Cache Policy](#35-extract-cache-policy)
+  - [3.6 Implement CodableFeedStore](#36-implement-codablefeedstore)
+  - [3.7 Implement CoreDataFeatureStore](#37-implement-coredatafeaturestore)
+  - [3.8 Cache Integration Tests](#38-cache-integration-tests)
+- [Phase 4 — UI Prototyping (Sandbox)](#phase-4--ui-prototyping-sandbox)
+- [Phase 5 — Decoupled Production UI](#phase-5--decoupled-production-ui)
+  - [5.1 Add iOS Framework Target](#51-add-ios-framework-target-optional)
+  - [5.2 Path A — UIKit](#path-a--uikit-uitableviewcontroller)
+  - [5.2 Path B — SwiftUI](#path-b--swiftui-view--observable-viewmodel)
+  - [5.3 Move to Production](#53-move-to-production)
+- [Phase 6 — Composition Root](#phase-6--composition-root-main-app-target)
+- [README — Progressive Documentation](#readme--progressive-documentation)
+- [Artifact Naming](#artifact-naming)
+- [Cross-Cutting Concerns](#cross-cutting-concerns-apply-throughout)
+- [Prompt Templates](#prompt-templates)
+
+---
+
 ## Session Start
 
 > Use this section at the beginning of every new session — including mid-phase handoffs.
 
-1. Read `CLAUDE.md` — hard constraints for this project.
-2. Run `git log --oneline` — identify the last committed test.
-3. Find that test's step in this script and confirm the current phase.
-4. State which step comes next. Do not write any code until confirmed.
+1. Run `git log --oneline` — identify the last committed test.
+2. Find that test's step in this script and confirm the current phase.
+3. State which step comes next. Do not write any code until confirmed.
+
+**Standing constraints (apply to every session):**
+- Default branch is always **master**.
+- Stack decisions already recorded in this runbook must not be re-opened — follow what is written.
 
 ---
 
